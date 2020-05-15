@@ -11,10 +11,7 @@ from edcnlp.dataloader.loader import examples_to_dataloader
 from edcnlp.model.taskModel import TokenClassification
 from edcnlp.utils.utils import display, build_pretrained_model
 from edcnlp.utils.trainer import Trainer
-import torch.nn.functional as F
 from seqeval.metrics import f1_score, classification_report
-import torch.nn as nn
-from transformers import AdamW,get_linear_schedule_with_warmup
 # take args
 parser = argparse.ArgumentParser()
 
