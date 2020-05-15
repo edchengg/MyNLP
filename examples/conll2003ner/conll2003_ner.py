@@ -241,7 +241,11 @@ if __name__ == '__main__':
     # trainer
     print('=' * 30)
     print('Training...')
-    trainer = Trainer(option=option, model=model, train_dataloader=train_dataloader, dev_dataloader=dev_dataloader, evaluator=evaluator)
+    trainer = Trainer(option=option,
+                      model=model,
+                      train_dataloader=train_dataloader,
+                      dev_dataloader=dev_dataloader,
+                      evaluator=evaluator)
     trainer.train()
     # test
     print('=' * 30)
