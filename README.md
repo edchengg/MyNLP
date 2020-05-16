@@ -11,3 +11,4 @@
 ## Quick Links
 - Example
     - [CoNLL2003 NER](https://github.com/edchengg/MyNLP/tree/master/examples/conll2003ner)
+    - [Arabic NER](https://github.com/edchengg/MyNLP/tree/master/examples/arabicNer)
