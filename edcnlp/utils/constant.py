@@ -1,5 +1,4 @@
 from transformers import BertModel,BertTokenizer,\
-    XLMModel, XLMTokenizer, \
     RobertaModel, RobertaTokenizer,\
     XLMRobertaModel, XLMRobertaTokenizer
 

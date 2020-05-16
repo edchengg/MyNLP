@@ -9,7 +9,8 @@ import torch
 from edcnlp.dataloader.feature import Example
 from edcnlp.dataloader.loader import examples_to_dataloader
 from edcnlp.model.taskModel import TokenClassification
-from edcnlp.utils.utils import display, build_pretrained_model_from_huggingface
+from edcnlp.utils.utils import display, build_pretrained_model_from_huggingface, build_pretrained_model_from_ckpt
+from edcnlp.utils.constant import MODELS_dict
 from edcnlp.utils.trainer import Trainer
 from seqeval.metrics import f1_score, classification_report
 import torch.nn.functional as F
@@ -21,13 +22,13 @@ parser.add_argument("--source_language", default='en', type=str,
                     help="The target language")
 parser.add_argument("--target_language", default='en', type=str,
                     help="The target language")
-parser.add_argument("--train_dir", default='/home/cheny/MyNLP/examples/conll2003ner/en/train.txt', type=str,
+parser.add_argument("--train_dir", default='/home/cheny/MyNLP/examples/arabicNer/data/train.txt', type=str,
                     help="The target language")
-parser.add_argument("--dev_dir", default='/home/cheny/MyNLP/examples/conll2003ner/en/dev.txt', type=str,
+parser.add_argument("--dev_dir", default='/home/cheny/MyNLP/examples/arabicNer/data/dev.txt', type=str,
                     help="The target language")
-parser.add_argument("--test_dir", default='/home/cheny/MyNLP/examples/conll2003ner/en/test.txt', type=str,
+parser.add_argument("--test_dir", default='/home/cheny/MyNLP/examples/arabicNer/data/test.txt', type=str,
                     help="The target language")
-parser.add_argument("--pretrained_model", default='XLMRoberta_base', type=str,
+parser.add_argument("--pretrained_model", default='/home/cheny/MyNLP/examples/arabicNer/gigabertv3', type=str,
                     help="list:  'MBert_base, Bert_large, Bert_base, Roberta_base, Roberta_large, XLMRoberta_base, XLMRoberta_large")
 parser.add_argument("--output_dir", default='save', type=str,
                     help="The output directory where the model predictions and checkpoints will be written.")
@@ -35,11 +36,11 @@ parser.add_argument("--model_name", default='model', type=str,
                     help="Checkpoint and config save prefix")
 parser.add_argument("--train_batchsize", default=32, type=int)
 parser.add_argument("--eval_batchsize", default=32, type=int)
-parser.add_argument("--learning_rate", default=5e-5, type=float)
-parser.add_argument("--max_epoch", default=5, type=int)
+parser.add_argument("--learning_rate", default=1e-5, type=float)
+parser.add_argument("--max_epoch", default=10, type=int)
 parser.add_argument("--seed", default=0, type=int)
-parser.add_argument("--dropout_ratio", default=0.4, type=float)
-parser.add_argument("--gpuid", default='1', type=str)
+parser.add_argument("--dropout_ratio", default=0.05, type=float)
+parser.add_argument("--gpuid", default='0', type=str)
 parser.add_argument("--pos_dim", default=0, type=int)
 parser.add_argument("--deprel_dim", default=0, type=int)
 parser.add_argument("--ner_dim", default=0, type=int)
@@ -63,8 +64,8 @@ class CoNLL2003Processor(object):
 
     def __init__(self):
         self.label = ["O",
-                      "B-MISC",
-                      "I-MISC",
+                      "B-MIS",
+                      "I-MIS",
                       "B-PER",
                       "I-PER",
                       "B-ORG",
@@ -113,11 +114,13 @@ class CoNLL2003Processor(object):
                     sentence = []
                     label = []
                 continue
-            splits = line.split(' ')
+
+            splits = line.strip('\n').split()
+
             # Word
             sentence.append(splits[0])
             # NER Label
-            label.append(splits[-1][:-1])
+            label.append(splits[-1])
 
         if len(sentence) > 0:
             data.append((sentence, label))
@@ -196,7 +199,11 @@ if __name__ == '__main__':
 
     print('=' * 30)
     print('Building Pretrained Model...')
-    Pretrained_model, tokenizer = build_pretrained_model_from_huggingface(option)
+    if option['pretrained_model'] not in MODELS_dict.keys():
+        device = torch.device('cuda:' + option['gpuid'])
+        Pretrained_model, tokenizer = build_pretrained_model_from_ckpt(option, device)
+    else:
+        Pretrained_model, tokenizer = build_pretrained_model_from_huggingface(option)
     # process data
     print('='* 30)
     print('Processing Data...')

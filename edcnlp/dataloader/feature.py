@@ -78,7 +78,8 @@ def convert_examples_to_features(examples,
                                           end=end,
                                           ignore_idx=ignore_idx)
                 features.append(feature)
-                start += end - num_duplicate
+                start += (end - num_duplicate - start)
+
                 end = calculate_end_idx(num_subwords,
                                         start=start,
                                         max_seq_length=max_seq_length)
