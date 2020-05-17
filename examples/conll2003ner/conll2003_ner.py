@@ -200,11 +200,11 @@ if __name__ == '__main__':
     # process data
     print('='* 30)
     print('Processing Data...')
-    procssor = CoNLL2003Processor()
-    label_list = procssor.get_labels()
-    train_examples = procssor.get_examples(option['train_dir'])
-    dev_examples = procssor.get_examples(option['dev_dir'])
-    test_examples = procssor.get_examples(option['test_dir'])
+    processor = CoNLL2003Processor()
+    label_list = processor.get_labels()
+    train_examples = processor.get_examples(option['train_dir'])
+    dev_examples = processor.get_examples(option['dev_dir'])
+    test_examples = processor.get_examples(option['test_dir'])
     option['num_labels'] = len(label_list)
     # create dataloader
     # input_ids, token_type_ids, attention_mask, valid_ids, pos_ids, ner_ids, deprel_ids, sen_id

@@ -7,7 +7,7 @@ def display(option):
     for k, v in option.items():
         print(k, '=', v)
 
-def build_pretrained_model_from_huggingface(option):
+def build_pretrained_model_from_huggingface(option, add_tokens=None):
     # Define pretrained model
     pretrained_model_dic = MODELS_dict[option['pretrained_model']]
     ckpt = pretrained_model_dic['checkpoint']
@@ -21,6 +21,11 @@ def build_pretrained_model_from_huggingface(option):
         tokenizer.cls_token = '[CLS]'
         tokenizer.mask_token = '[MASK]'
         tokenizer.pad_token = '[PAD]'
+
+    if add_tokens != None:
+        tokenizer.add_tokens(add_tokens)
+        print('We have added', add_tokens, 'tokens')
+        Pretrained_model.resize_token_embeddings(len(tokenizer))
     return Pretrained_model, tokenizer
 
 def build_pretrained_model_from_ckpt(option, device):
