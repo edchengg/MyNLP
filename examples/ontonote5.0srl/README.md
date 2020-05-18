@@ -10,3 +10,4 @@ A BERT-based example for SRL.
     Model           Test F1
     Shi et al(2019) 86.2
     BERT            85.1
+    RoBERTa         86.0
