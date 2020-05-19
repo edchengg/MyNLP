@@ -6,7 +6,8 @@ from transformers import BertModel,BertTokenizer,\
 MODELS_dict = {
           'MBert_base': {'model': BertModel, 'tokenizer': BertTokenizer, 'checkpoint': 'bert-base-multilingual-cased'},
           'Bert_large': {'model': BertModel, 'tokenizer': BertTokenizer, 'checkpoint': 'bert-large-cased'},
-          'Bert_base': {'model': BertModel, 'tokenizer': BertTokenizer, 'checkpoint': 'bert-base-cased'},
+          'Bert_base_cased': {'model': BertModel, 'tokenizer': BertTokenizer, 'checkpoint': 'bert-base-cased'},
+          'Bert_base_uncased': {'model': BertModel, 'tokenizer': BertTokenizer, 'checkpoint': 'bert-base-uncased'},
           "Roberta_base": {'model': RobertaModel, 'tokenizer': RobertaTokenizer, 'checkpoint': 'roberta-base'},
           "Roberta_large": {'model': RobertaModel, 'tokenizer': RobertaTokenizer, 'checkpoint': 'roberta-large'},
           "XLMRoberta_base": {'model': XLMRobertaModel, 'tokenizer': XLMRobertaTokenizer, 'checkpoint': 'xlm-roberta-base'},

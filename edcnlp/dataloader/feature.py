@@ -7,19 +7,22 @@ class Example(object):
                  label=None,
                  pos=None,
                  ner=None,
-                 deprel=None):
+                 deprel=None,
+                 label_mask=None):
         self.token = token
         self.label = label
-        self.pos = ['[PAD]'] * len(token) if pos == None else pos
-        self.ner = ['[PAD]'] * len(token) if ner == None else ner
-        self.deprel = ['[PAD]'] * len(token) if deprel == None else deprel
+        self.pos = ['[PAD]'] * len(token) if pos is None else pos
+        self.ner = ['[PAD]'] * len(token) if ner is None else ner
+        self.deprel = ['[PAD]'] * len(token) if deprel is None else deprel
+        self.label_mask = [1] * len(label) if label_mask is None else label_mask
 
 
         self.dic = {'token': self.token,
                     'label': self.label,
                     'pos': self.convert_to_id(self.pos, POS_TO_ID),
                     'ner': self.convert_to_id(self.ner, NER_TO_ID),
-                    'deprel': self.convert_to_id(self.deprel, DEPREL_TO_ID)
+                    'deprel': self.convert_to_id(self.deprel, DEPREL_TO_ID),
+                    'label_mask': self.label_mask
                     }
 
     def convert_to_id(self, type_list, id):
@@ -132,7 +135,7 @@ def prepare_feature(example,
         pos_list = example['pos'][start:end]
         ner_list = example['ner'][start:end]
         deprel_list = example['deprel'][start:end]
-
+        label_mask = example['label_mask'][start:end]
         total_subwords = []
         valid_idx = []
         for i, tok in enumerate(token_list):
@@ -144,6 +147,8 @@ def prepare_feature(example,
                 else:
                     valid_idx.append(0)
 
+        total_subwords = total_subwords[:max_seq_length - 2] #cut out long single word such as url link
+        valid_idx = valid_idx[:max_seq_length - 2]
         bos_token = tokenizer.bos_token
         eos_token = tokenizer.eos_token
         pad_token = tokenizer.pad_token
@@ -167,7 +172,7 @@ def prepare_feature(example,
                 eval_idx[ig] = 0
 
         pad_label_length = max_seq_length - len(label_list)
-        label_mask = [1] * len(label_list)
+
         label_list += [0] * pad_label_length
         label_mask += [0] * pad_label_length
         pos_list += [0] * pad_label_length
@@ -176,7 +181,9 @@ def prepare_feature(example,
         eval_idx += [0] * pad_label_length
 
         assert len(input_ids) == max_seq_length
+        assert len(valid_idx) == max_seq_length
         assert len(label_list) == max_seq_length
+        assert len(label_mask) == max_seq_length
 
         feature =  {'input_ids':input_ids,
                    'input_mask':input_mask,

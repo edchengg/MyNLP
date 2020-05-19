@@ -1,5 +1,5 @@
 '''
-NER example for CoNLL 2003
+POS Tagging for UDv1.4
 
 '''
 import argparse
@@ -9,8 +9,9 @@ import torch
 from edcnlp.dataloader.feature import Example
 from edcnlp.dataloader.loader import examples_to_dataloader
 from edcnlp.model.taskModel import TokenClassification
-from edcnlp.utils.utils import display, build_pretrained_model_from_huggingface
+from edcnlp.utils.utils import display, build_pretrained_model_from_huggingface, build_pretrained_model_from_ckpt
 from edcnlp.utils.trainer import Trainer
+from edcnlp.utils.constant import MODELS_dict
 from seqeval.metrics import f1_score, classification_report
 import torch.nn.functional as F
 # take args
@@ -21,14 +22,14 @@ parser.add_argument("--source_language", default='en', type=str,
                     help="The target language")
 parser.add_argument("--target_language", default='en', type=str,
                     help="The target language")
-parser.add_argument("--train_dir", default='/home/cheny/MyNLP/examples/conll2003ner/en/train.txt', type=str,
+parser.add_argument("--train_dir", default='/home/cheny/MyNLP/examples/udv1.4pos/UD_Arabic/ar-ud-train.conllu', type=str,
                     help="The target language")
-parser.add_argument("--dev_dir", default='/home/cheny/MyNLP/examples/conll2003ner/en/dev.txt', type=str,
+parser.add_argument("--dev_dir", default='/home/cheny/MyNLP/examples/udv1.4pos/UD_Arabic/ar-ud-dev.conllu', type=str,
                     help="The target language")
-parser.add_argument("--test_dir", default='/home/cheny/MyNLP/examples/conll2003ner/en/test.txt', type=str,
+parser.add_argument("--test_dir", default='/home/cheny/MyNLP/examples/udv1.4pos/UD_Arabic/ar-ud-test.conllu', type=str,
                     help="The target language")
-parser.add_argument("--pretrained_model", default='Bert_base_cased', type=str,
-                    help="list:  'MBert_base, Bert_large, Bert_base, Roberta_base, Roberta_large, XLMRoberta_base, XLMRoberta_large")
+parser.add_argument("--pretrained_model", default='/data/lan/BiBERT/saved_model/bibert', type=str,
+                    help="list:  'MBert_base, Bert_large, Bert_base_cased/uncased, Roberta_base, Roberta_large, XLMRoberta_base, XLMRoberta_large, /data/lan/BiBERT/saved_model/bibert")
 parser.add_argument("--output_dir", default='save', type=str,
                     help="The output directory where the model predictions and checkpoints will be written.")
 parser.add_argument("--model_name", default='model', type=str,
@@ -47,8 +48,8 @@ parser.add_argument("--freeze", default='0', type=str,
                     help='embedding: freeze embedding, 0: no freeze, n: freeze layers under n')
 parser.add_argument("--train_max_seq_length", default=128, type=int)
 parser.add_argument("--eval_max_seq_length", default=128, type=int)
-parser.add_argument("--train_num_duplicate", default=20, type=int)
-parser.add_argument("--eval_num_duplicate", default=20, type=int)
+parser.add_argument("--train_num_duplicate", default=0, type=int)
+parser.add_argument("--eval_num_duplicate", default=0, type=int)
 parser.add_argument("--warmup_proportion", default=0.4, type=float)
 parser.add_argument("--gradient_accumulation_steps", default=1, type=int,
                     help="Number of updates steps to accumulate before performing a backward/update pass.")
@@ -58,74 +59,59 @@ parser.add_argument("--crf", default=0, type=int,
 
 
 # dataprocessor
-class CoNLL2003Processor(object):
-    '''Processor for CoNLL-2003 data set.'''
-
+class UDProcessor(object):
+    '''Processor for POS tagging UDv1.4 data set.'''
     def __init__(self):
-        self.label = ["O",
-                      "B-MISC",
-                      "I-MISC",
-                      "B-PER",
-                      "I-PER",
-                      "B-ORG",
-                      "I-ORG",
-                      "B-LOC",
-                      "I-LOC"]
+        self.label = ['ADJ', 'ADP', 'ADV', 'AUX', 'CONJ', 'DET',
+                'INTJ', 'NOUN', 'NUM', 'PART', 'PRON', 'PROPN',
+                'PUNCT', 'SCONJ', 'SYM', 'VERB', 'X', '_']
         self.create_label_map()
 
-    def get_examples(self,
-                     data_dir):
-        tsv = self.read_tsv(data_dir)
-        examples = self.create_examples(tsv)
+    def get_examples(self, data_dir):
+        sents, tags = self.read_tsv(data_dir)
+        examples = self.create_examples(sents, tags)
         return examples
-
-    def get_labels(self):
-        return self.label
 
     def create_label_map(self):
         self.label_map = {k:  idx for idx, k in enumerate(self.label)}
 
-    def create_examples(self,
-                        lines):
+    def get_labels(self):
+        return self.label
+
+    def create_examples(self, sents, tags):
         examples = []
-        for i, (sentence, label) in enumerate(lines):
-            text = sentence
-            label = [self.label_map[l] for l in label]
-            examples.append(Example(token=text, label=label))
+        for i, (sentence, label) in enumerate(zip(sents, tags)):
+            label = [self.label_map[t] for t in label]
+            examples.append(Example(token=sentence, label=label))
         return examples
 
-    def read_tsv(self,
-                 filename):
+    def read_tsv(self, filename):
         '''
         read file
         '''
         print('Reading file: ', filename)
-        f = open(filename, encoding='utf-8')
-        data = []
-        sentence = []
-        label = []
-        for line in f:
-            if len(line) == 0 or line.startswith('-DOCSTART') or line[0] == "\n":
+        sents = []
+        tags = []
+        sent = []
+        tag = []
+        with open(filename, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line[0] == '#':
+                    continue
+                if line.strip():
+                    token = line.strip('\n').split('\t')
+                    word = token[1]
+                    t = token[3]
+                    sent.append(word)
+                    tag.append(t)
+                else:
+                    sents.append(sent)
+                    tags.append(tag)
+                    sent = []
+                    tag = []
 
-                if len(sentence) > 0:
-                    # Add Sentence and label to data
-                    data.append((sentence, label))
-                    sentence = []
-                    label = []
-                continue
-            splits = line.split(' ')
-            # Word
-            sentence.append(splits[0])
-            # NER Label
-            label.append(splits[-1][:-1])
-
-        if len(sentence) > 0:
-            data.append((sentence, label))
-            sentence = []
-            label = []
-
-        print('Data size: ', len(data))
-        return data
+        print('Data size: ', len(sents))
+        return sents, tags
 
 def evaluator(model,
               dataloader):
@@ -175,8 +161,9 @@ def evaluator(model,
                         temp_gold.append(label_map[label_ids[bz_idx][tok_idx]])
                         temp_pred.append(label_map[logits[bz_idx][tok_idx]])
 
-    res = f1_score(y_true, y_pred)
-    print(classification_report(y_true, y_pred))
+    flat_y_true = [t for sublist in y_true for t in sublist]
+    flat_y_pred = [p for sublist in y_pred for p in sublist]
+    res = sum(1 for x, y in zip(flat_y_true, flat_y_pred) if x == y) / len(flat_y_true)
     avg_loss = dev_loss / len(dataloader)
     return res, avg_loss
 
@@ -196,11 +183,15 @@ if __name__ == '__main__':
 
     print('=' * 30)
     print('Building Pretrained Model...')
-    Pretrained_model, tokenizer = build_pretrained_model_from_huggingface(option)
+    if option['pretrained_model'] not in MODELS_dict.keys():
+        device = torch.device('cuda:' + option['gpuid'])
+        Pretrained_model, tokenizer = build_pretrained_model_from_ckpt(option, [], device)
+    else:
+        Pretrained_model, tokenizer = build_pretrained_model_from_huggingface(option)
     # process data
     print('='* 30)
     print('Processing Data...')
-    processor = CoNLL2003Processor()
+    processor = UDProcessor()
     label_list = processor.get_labels()
     train_examples = processor.get_examples(option['train_dir'])
     dev_examples = processor.get_examples(option['dev_dir'])

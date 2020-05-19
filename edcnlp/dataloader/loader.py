@@ -49,6 +49,7 @@ def examples_to_dataloader(examples,
                                             tokenizer=tokenizer,
                                             set_type=set_type,
                                             option=option)
+    print('Num of instances in {}: {}'.format(set_type, len(features)))
     dataloader = create_dataloader_tagging(features,
                                            keys=keys,
                                            set_type=set_type,
