@@ -54,10 +54,6 @@ def convert_examples_to_features(examples,
     for (sen_id, example) in enumerate(examples):
         token_list = example['token']
 
-        if set_type != 'train':
-            # change the label mask back to all 1
-            example.dic['label_mask'] = [1 for _ in range(len(token_list))]
-
         # check if exceeds max_seq_length
         total_subwords = []
         num_subwords = [] # record number of subwords for each token
