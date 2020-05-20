@@ -60,7 +60,7 @@ class Trainer(object):
             self.model.train()
             for step, batch in enumerate(self.train_dataloader.dataloader):
                 batch = tuple(t.to(device) for t in batch)
-                input_ids, token_type_ids, attention_mask, valid_ids, pos_ids, ner_ids, deprel_ids, eval_idx, label_ids, label_mask, sen_id = batch
+                input_ids, token_type_ids, attention_mask, valid_ids, pos_ids, ner_ids, deprel_ids, eval_idx, label_ids, label_mask, sen_id = batch #### ADD SRL ID #####
                 loss, _ = self.model(input_ids,
                                         token_type_ids=token_type_ids,
                                         attention_mask=attention_mask,
@@ -69,7 +69,7 @@ class Trainer(object):
                                         ner_ids=ner_ids,
                                         deprel_ids=deprel_ids,
                                         labels=label_ids,
-                                        label_mask=label_mask)
+                                        label_mask=label_mask)#### ADD SRL ID #####
 
                 loss = loss / self.option['gradient_accumulation_steps']
                 loss.backward()

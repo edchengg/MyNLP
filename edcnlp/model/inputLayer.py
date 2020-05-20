@@ -68,7 +68,7 @@ class InputEmbedding(BasicModel):
                                     option['ner_dim']) if option['ner_dim'] > 0 else None
         self.deprel_emb = nn.Embedding(len(DEPREL_TO_ID),
                                        option['deprel_dim']) if option['deprel_dim'] > 0 else None
-
+        #### ADD SRL ID #####
     def forward(self,
                 input_ids,
                 token_type_ids=None,
@@ -89,6 +89,7 @@ class InputEmbedding(BasicModel):
             embs += [self.ner_emb[ner_ids]]
         if self.option['deprel_dim'] > 0:
             embs += [self.deprel_emb['deprel_ids']]
+        #### ADD SRL ID #####
         embs = torch.cat(embs, dim=2)
         return embs, last_layer_repr
 

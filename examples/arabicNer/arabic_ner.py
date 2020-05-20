@@ -28,7 +28,7 @@ parser.add_argument("--dev_dir", default='/home/cheny/MyNLP/examples/arabicNer/d
                     help="The target language")
 parser.add_argument("--test_dir", default='/home/cheny/MyNLP/examples/arabicNer/data/test.txt', type=str,
                     help="The target language")
-parser.add_argument("--pretrained_model", default='/home/cheny/MyNLP/examples/arabicNer/gigabertv3', type=str,
+parser.add_argument("--pretrained_model", default='/data/lan/BiBERT/saved_model/bibert', type=str,
                     help="list:  'MBert_base, Bert_large, Bert_base, Roberta_base, Roberta_large, XLMRoberta_base, XLMRoberta_large")
 parser.add_argument("--output_dir", default='save', type=str,
                     help="The output directory where the model predictions and checkpoints will be written.")
@@ -36,10 +36,11 @@ parser.add_argument("--model_name", default='model', type=str,
                     help="Checkpoint and config save prefix")
 parser.add_argument("--train_batchsize", default=32, type=int)
 parser.add_argument("--eval_batchsize", default=32, type=int)
-parser.add_argument("--learning_rate", default=1e-5, type=float)
-parser.add_argument("--max_epoch", default=10, type=int)
+parser.add_argument("--learning_rate", default=1e-4, type=float)
+parser.add_argument("--max_epoch", default=5, type=int)
+parser.add_argument("--warmup_proportion", default=0.4, type=float)
 parser.add_argument("--seed", default=0, type=int)
-parser.add_argument("--dropout_ratio", default=0.05, type=float)
+parser.add_argument("--dropout_ratio", default=0.4, type=float)
 parser.add_argument("--gpuid", default='0', type=str)
 parser.add_argument("--pos_dim", default=0, type=int)
 parser.add_argument("--deprel_dim", default=0, type=int)
@@ -50,7 +51,6 @@ parser.add_argument("--train_max_seq_length", default=128, type=int)
 parser.add_argument("--eval_max_seq_length", default=128, type=int)
 parser.add_argument("--train_num_duplicate", default=20, type=int)
 parser.add_argument("--eval_num_duplicate", default=20, type=int)
-parser.add_argument("--warmup_proportion", default=0.4, type=float)
 parser.add_argument("--gradient_accumulation_steps", default=1, type=int,
                     help="Number of updates steps to accumulate before performing a backward/update pass.")
 parser.add_argument("--crf", default=0, type=int,
@@ -197,11 +197,10 @@ if __name__ == '__main__':
     print('Configuration...')
     display(option)
 
-    print('=' * 30)
     print('Building Pretrained Model...')
     if option['pretrained_model'] not in MODELS_dict.keys():
         device = torch.device('cuda:' + option['gpuid'])
-        Pretrained_model, tokenizer = build_pretrained_model_from_ckpt(option, device)
+        Pretrained_model, tokenizer = build_pretrained_model_from_ckpt(option, [], device)
     else:
         Pretrained_model, tokenizer = build_pretrained_model_from_huggingface(option)
     # process data

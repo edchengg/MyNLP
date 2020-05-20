@@ -32,3 +32,4 @@ POS_TO_ID = {k: idx for idx, k in enumerate(POS_TYPE)}
 NER_TYPE = [_PAD, 'PER', 'ORG', 'LOC', 'MISC']
 NER_TO_ID = {k: idx for idx, k in enumerate(NER_TYPE)}
 
+##### ADD SRL ID HERE ########

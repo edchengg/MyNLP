@@ -41,11 +41,12 @@ def build_pretrained_model_from_ckpt(option, add_tokens, device):
     '''
     # define BERT model
     pretrained_model_dic = MODELS_dict['Bert_base_uncased']
-    config = BertConfig.from_json_file(option['pretrained_model'] + '/config.json')
-    config.output_hidden_states = True
-    Pretrained_model = pretrained_model_dic['model'](config=config)
-    Pretrained_model.load_state_dict(torch.load(option['pretrained_model'] + '/pytorch_model.bin', map_location=device),
-                                     strict=False)
+    # config = BertConfig.from_json_file(option['pretrained_model'] + '/config.json')
+    # config.output_hidden_states = True
+    # Pretrained_model = pretrained_model_dic['model'](config=config)
+    # Pretrained_model.load_state_dict(torch.load(option['pretrained_model'] + '/pytorch_model.bin', map_location=device),
+    #                                  strict=False)
+    Pretrained_model = pretrained_model_dic['model'].from_pretrained(option['pretrained_model'])
 
     lower_case_flag = True
     print('lower_case_flag: ', lower_case_flag)

@@ -14,6 +14,7 @@ class Example(object):
         self.pos = ['[PAD]'] * len(token) if pos is None else pos
         self.ner = ['[PAD]'] * len(token) if ner is None else ner
         self.deprel = ['[PAD]'] * len(token) if deprel is None else deprel
+        #### ADD SRL ID #####
         self.label_mask = [1] * len(label) if label_mask is None else label_mask
 
 
@@ -22,6 +23,7 @@ class Example(object):
                     'pos': self.convert_to_id(self.pos, POS_TO_ID),
                     'ner': self.convert_to_id(self.ner, NER_TO_ID),
                     'deprel': self.convert_to_id(self.deprel, DEPREL_TO_ID),
+                    #### ADD SRL ID #####
                     'label_mask': self.label_mask
                     }
 
@@ -138,6 +140,7 @@ def prepare_feature(example,
         label_list = example['label'][start:end]
         pos_list = example['pos'][start:end]
         ner_list = example['ner'][start:end]
+        #### ADD SRL ID #####
         deprel_list = example['deprel'][start:end]
         label_mask = example['label_mask'][start:end]
         total_subwords = []
@@ -182,6 +185,7 @@ def prepare_feature(example,
         pos_list += [0] * pad_label_length
         ner_list += [0] * pad_label_length
         deprel_list += [0] * pad_label_length
+        #### ADD SRL ID #####
         eval_idx += [0] * pad_label_length
 
         assert len(input_ids) == max_seq_length
@@ -199,6 +203,7 @@ def prepare_feature(example,
                    'pos_ids':pos_list,
                    'ner_ids':ner_list,
                    'deprel_ids':deprel_list,
+                    #### ADD SRL ID #####
                    'sen_id':sen_id}
         return feature
 

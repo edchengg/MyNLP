@@ -31,6 +31,7 @@ class TokenClassification(BasicModel):
                 pos_ids=None,
                 ner_ids=None,
                 deprel_ids=None,
+                #### ADD SRL ID #####
                 labels=None,
                 label_mask=None):
 
@@ -40,7 +41,7 @@ class TokenClassification(BasicModel):
                                     valid_ids=valid_ids,
                                     pos_ids=pos_ids,
                                     ner_ids=ner_ids,
-                                    deprel_ids=deprel_ids)
+                                    deprel_ids=deprel_ids)#### ADD SRL ID #####
 
         if labels is not None:
             loss, logits = self.task_layer(input_emb,
