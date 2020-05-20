@@ -34,7 +34,7 @@ parser.add_argument("--output_dir", default='save', type=str,
                     help="The output directory where the model predictions and checkpoints will be written.")
 parser.add_argument("--model_name", default='model', type=str,
                     help="Checkpoint and config save prefix")
-parser.add_argument("--train_batchsize", default=32, type=int)
+parser.add_argument("--train_batchsize", default=16, type=int)
 parser.add_argument("--eval_batchsize", default=32, type=int)
 parser.add_argument("--learning_rate", default=1e-4, type=float)
 parser.add_argument("--max_epoch", default=5, type=int)
