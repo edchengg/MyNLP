@@ -14,3 +14,6 @@
     - [Arabic NER](https://github.com/edchengg/MyNLP/tree/master/examples/arabicNer)
     - [OntoNote5.0 SRL](https://github.com/edchengg/MyNLP/tree/master/examples/ontonote5.0srl)
     - [UDv1.4 POS Tagging](https://github.com/edchengg/MyNLP/tree/master/examples/udv1.4pos)
+
+## Funding Acknowledgment
+This material is based in part on research sponsored by IARPA via the BETTER program (2019-19051600004).
